@@ -1,8 +1,5 @@
 import org.testng.annotations.Test;
-import steps.AuthorizationSteps;
-import steps.BlockCardModuleSteps;
-import steps.CardBalanceSteps;
-import steps.PinResetSteps;
+import steps.*;
 import utils.SetUpClass;
 
 public class CardPageTest extends SetUpClass {
@@ -10,6 +7,8 @@ public class CardPageTest extends SetUpClass {
     CardBalanceSteps cardBalanceSteps = new CardBalanceSteps();
     BlockCardModuleSteps blockCardModuleSteps = new BlockCardModuleSteps();
     PinResetSteps pinResetSteps = new PinResetSteps();
+    CardNavigationSteps cardNavigationSteps = new CardNavigationSteps();
+    TransferSteps transferSteps = new TransferSteps();
 
     @Test
     public void checkCardNameAndBalance(){
@@ -47,4 +46,21 @@ public class CardPageTest extends SetUpClass {
                 .confirmResetPin()
                 .assertAll();
     }
+
+    @Test
+    public void cardNavigation(){
+        authorizationSteps.authorization();
+        cardBalanceSteps.goToCards();
+        cardNavigationSteps.checkCardNavigation();
+    }
+
+    @Test
+    public void TransferAmount(){
+        authorizationSteps.authorization();
+        cardBalanceSteps.goToCards();
+        transferSteps.checkTransferNavigation();
+        transferSteps.moneyTransfer();
+        transferSteps.checkTransactions();
+    }
+
 }

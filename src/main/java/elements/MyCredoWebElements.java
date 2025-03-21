@@ -39,5 +39,18 @@ public class MyCredoWebElements {
             SuccessMessage = $(byXpath("//*[@id=\"growlText\"]")),
             Timer = $(byXpath("/html/body/app-root/app-home/div/div/app-accounts-and-cards-details/app-popup-container/div/div/div[2]/app-pin-reset/div/div/app-otp/form/p[2]")),
             ResendCodeButton = $(byXpath("/html/body/app-root/app-home/div/div/app-accounts-and-cards-details/app-popup-container/div/div/div[2]/app-pin-reset/div/div/app-otp/form/p[2]")),
-            ErrorTextMessage = $(byXpath("//*[@id=\"growlText\"]"));
+            ErrorTextMessage = $(byXpath("//*[@id=\"growlText\"]")),
+            GoToPreviousCard = $("#selectPreviousProduct"),
+            GoToNextCard = $("#selectNextProduct"),
+            TransferButton = $("#transfer"),
+            TransfersHeader = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[1]")),
+            OwnAccounts = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/div/div[1]")),
+            FromInput = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/form/div[1]/app-account-select-advanced/div/div/p[1]")),
+            WhereInput = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/form/div[3]/app-account-select-advanced/div/div/p[1]")),
+            AnotherAccount = $(byXpath("//*[@id=\"accountItem\"]/div[1]")),
+            AnotherAccountsCurrency = $("#accountCurrency_00"),
+            AmountInput = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/form/div[5]/input")),
+            Transfer = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/form/button")),
+            CloseSuccessPage = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/app-popup-container/div/div/div[1]/div[2]")),
+            TransactionsButton = $(byXpath("/html/body/app-root/app-home/div/div/app-home-header/header/div/div/nav/a[4]"));
 }

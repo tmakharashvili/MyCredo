@@ -13,6 +13,8 @@ public class SetUpClass {
         Configuration.browser="chrome";
         Configuration.timeout=10000; // Changed from 10 to 10000 (10 seconds)
         open("https://testmycredo.credo.ge/landing/main/auth");
+
+        System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
     }
     @AfterTest
     public static void tearDown(){
