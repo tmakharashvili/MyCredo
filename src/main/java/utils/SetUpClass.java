@@ -11,7 +11,7 @@ public class SetUpClass {
     @BeforeSuite
     public static void setUp (){
         Configuration.browser="chrome";
-        Configuration.timeout=10000; // Changed from 10 to 10000 (10 seconds)
+        Configuration.timeout=15000;
         open("https://testmycredo.credo.ge/landing/main/auth");
 
         System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");

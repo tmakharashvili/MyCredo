@@ -26,4 +26,10 @@ public class ApiRequestSpec {
                 .expectContentType(ContentType.JSON)
                 .build();
     }
+
+    // Money transfer API request specification with path
+    public static RequestSpecification moneyTransferEndpointSpec() {
+        return postRequestSpec()
+                .basePath("/api/v1/payments/MoneyTransfer");
+    }
 }

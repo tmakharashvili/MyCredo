@@ -53,14 +53,20 @@ public class CardPageTest extends SetUpClass {
         cardBalanceSteps.goToCards();
         cardNavigationSteps.checkCardNavigation();
     }
+    @Test
+    public void downloadRequisite(){
+        authorizationSteps.authorization();
+        cardBalanceSteps.goToCards();
+        cardNavigationSteps.checkRequisite();
+    }
 
     @Test
     public void TransferAmount(){
         authorizationSteps.authorization();
         cardBalanceSteps.goToCards();
-        transferSteps.checkTransferNavigation();
-        transferSteps.moneyTransfer();
-        transferSteps.checkTransactions();
+        transferSteps
+                .checkTransferNavigation()
+                .moneyTransfer()
+                .verifyTransferDetails();
     }
-
 }

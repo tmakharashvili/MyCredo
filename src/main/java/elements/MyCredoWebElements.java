@@ -44,13 +44,16 @@ public class MyCredoWebElements {
             GoToNextCard = $("#selectNextProduct"),
             TransferButton = $("#transfer"),
             TransfersHeader = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[1]")),
-            OwnAccounts = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/div/div[1]")),
-            FromInput = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/form/div[1]/app-account-select-advanced/div/div/p[1]")),
-            WhereInput = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/form/div[3]/app-account-select-advanced/div/div/p[1]")),
+            OwnAccounts = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/div/div[1]/div[2]")),
+            FromInput = $(byXpath("//p[@_ngcontent-ng-c322433402 and contains(@class, 'selected-accounts')]")),
+            WhereInput = $(byXpath("(//div[contains(@class, 'advanced-accounts-select')])[2]")),
+            AccountsPopup = $(".popup-wrapper"),
             AnotherAccount = $(byXpath("//*[@id=\"accountItem\"]/div[1]")),
             AnotherAccountsCurrency = $("#accountCurrency_00"),
             AmountInput = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/form/div[5]/input")),
             Transfer = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/form/button")),
-            CloseSuccessPage = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/app-popup-container/div/div/div[1]/div[2]")),
-            TransactionsButton = $(byXpath("/html/body/app-root/app-home/div/div/app-home-header/header/div/div/nav/a[4]"));
+            RequisiteButton = $("#downloadRequisite"),
+            SenderNumberUI = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/app-popup-container/div/div/div[2]/div/div[2]/div[1]/div/p[2]")),
+            ReceiverNumberUI = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/app-popup-container/div/div/div[2]/div/div[2]/div[2]/div/p[2]")),
+            AmountUI = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/app-popup-container/div/div/div[2]/div/div[2]/div[3]/div/p[2]"));
 }

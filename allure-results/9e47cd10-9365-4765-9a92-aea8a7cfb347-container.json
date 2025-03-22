@@ -1,0 +1,1 @@
+{"uuid":"9e47cd10-9365-4765-9a92-aea8a7cfb347","name":"MyCredo","children":["a2d89dd9-098b-4833-8a1a-c8595e5e963d"],"befores":[],"afters":[{"name":"tearDown","status":"passed","stage":"finished","description":"","steps":[],"attachments":[],"parameters":[],"start":1742671433045,"stop":1742671433847}],"start":1742671401065,"stop":1742671433848}

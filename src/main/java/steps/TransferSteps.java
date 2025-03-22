@@ -1,26 +1,86 @@
 package steps;
 
+import dataController.DataControllerTransfer;
 import elements.MyCredoWebElements;
+import models.cardModule.MoneyTransfer;
+import org.testng.Assert;
+
+import java.sql.SQLException;
+import java.time.Duration;
+import java.util.List;
+
 import static com.codeborne.selenide.Condition.visible;
 
 public class TransferSteps extends MyCredoWebElements {
+    private String actualAccountNumber;
 
-    public void checkTransferNavigation(){
+
+    public TransferSteps checkTransferNavigation(){
+        actualAccountNumber = AccountNumberUI.getText().trim();
+
         TransferButton.click();
         TransfersHeader.shouldBe(visible);
+
+        return this;
     }
 
-    public void moneyTransfer(){
+    public TransferSteps moneyTransfer(){
         OwnAccounts.click();
+        String expectedAccountNumber = FromInput.getText().trim();
+
+        Assert.assertEquals(actualAccountNumber, expectedAccountNumber, "ანგარიშის ნომრები არ ემთხვევა!");
+
         WhereInput.click();
+        AccountsPopup.shouldBe(visible, Duration.ofSeconds(20));
         AnotherAccount.click();
         AnotherAccountsCurrency.click();
-        AmountInput.setValue("10");
+        AmountInput.setValue("11");
         Transfer.click();
-        CloseSuccessPage.click();
+
+        return this;
     }
 
-    public void checkTransactions(){
-        TransactionsButton.click();
+    public TransferSteps verifyTransferDetails() {
+        try {
+            // UI-დან მონაცემების აღება
+            String senderAccountUI = SenderNumberUI.getText().trim();
+            String receiverAccountUI = ReceiverNumberUI.getText().trim();
+            String amountWithCurrencyUI = AmountUI.getText().trim();
+
+            // API/DB-დან მონაცემების აღება
+            List<MoneyTransfer> transfers = DataControllerTransfer.getTransferDetailsFromDB(senderAccountUI, receiverAccountUI);
+
+            if (!transfers.isEmpty()) {
+                MoneyTransfer transfer = transfers.get(0);
+
+                String currencySymbol = transfer.getCurrencyApi().equalsIgnoreCase("GEL") ? "₾" : transfer.getCurrencyApi();
+
+                // ფორმატირებული თანხა ვალუტის სიმბოლოთი
+                String formattedAmountWithSymbol = String.format("%.2f %s", transfer.getAmountApi(), currencySymbol);
+
+                // დეტალების გამოტანა ლოგში
+                System.out.println("UI გადარიცხვის დეტალები:");
+                System.out.println("გამგზავნი ანგარიში: " + senderAccountUI);
+                System.out.println("მიმღები ანგარიში: " + receiverAccountUI);
+                System.out.println("თანხა და ვალუტა: " + amountWithCurrencyUI);
+
+                System.out.println("\nAPI გადარიცხვის დეტალები:");
+                System.out.println("გამგზავნი ანგარიში: " + transfer.getSenderAccountNumberApi());
+                System.out.println("მიმღები ანგარიში: " + transfer.getReceiverAccountNumberApi());
+                System.out.println("თანხა: " + transfer.getAmountApi());
+                System.out.println("ვალუტა: " + transfer.getCurrencyApi());
+                System.out.println("ფორმატირებული თანხა და ვალუტა: " + formattedAmountWithSymbol);
+
+                Assert.assertEquals(senderAccountUI, transfer.getSenderAccountNumberApi(), "გამგზავნი ანგარიშის ნომრები არ ემთხვევა!");
+                Assert.assertEquals(receiverAccountUI, transfer.getReceiverAccountNumberApi(), "მიმღები ანგარიშის ნომრები არ ემთხვევა!");
+                Assert.assertEquals(amountWithCurrencyUI, formattedAmountWithSymbol, "თანხა და ვალუტა არ ემთხვევა!");
+            } else {
+                Assert.fail("მონაცემთა ბაზაში ვერ მოიძებნა გადარიცხვა მითითებული ანგარიშებით!");
+            }
+        } catch (SQLException e) {
+            Assert.fail("გადარიცხვის შემოწმებისას მოხდა შეცდომა: " + e.getMessage());
+        }
+
+        return this;
     }
 }

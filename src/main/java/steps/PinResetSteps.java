@@ -2,6 +2,7 @@ package steps;
 
 import com.codeborne.selenide.Condition;
 import elements.MyCredoWebElements;
+import org.testng.Assert;
 import org.testng.asserts.SoftAssert;
 
 import java.time.Duration;
@@ -11,7 +12,7 @@ import static data.AuthorizationData.OTP;
 import static data.AuthorizationData.WrongOTP;
 
 public class PinResetSteps extends MyCredoWebElements {
-    private SoftAssert softAssert = new SoftAssert();
+    private final SoftAssert softAssert = new SoftAssert();
 
     public PinResetSteps closePinPopupWithX() {
         PinResetButton.click();
@@ -30,13 +31,13 @@ public class PinResetSteps extends MyCredoWebElements {
     public PinResetSteps checkTimer() {
         PinResetButton.click();
         COnfirmResetPin.click();
-        OTPpage.isDisplayed();
         String initialTimer = Timer.getText();
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Assert.fail("შეცდომა Thread.sleep-ის გამოძახებისას: " + e.getMessage());
         }
+
         String updatedTimer = Timer.getText();
         softAssert.assertNotEquals(initialTimer, updatedTimer, "ტაიმერი არ იცვლება");
 
