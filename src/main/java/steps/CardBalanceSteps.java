@@ -4,6 +4,7 @@ import dataController.DataControllerCardModule;
 import elements.MyCredoWebElements;
 import models.cardModule.AccountDetails;
 import org.testng.Assert;
+
 import java.util.List;
 
 import static com.codeborne.selenide.Selenide.sleep;
@@ -49,9 +50,26 @@ public class CardBalanceSteps extends MyCredoWebElements {
             // UI-დან ინფორმაციის წამოღება
             String accountNumberFromUI = AccountNumberUI.getText().trim();
             String uiTotalBalanceText = AvailableBalance.getText().trim();
-            double uiTotalBalance = Double.parseDouble(uiTotalBalanceText.replaceAll("[^0-9.,]", "").replace(",", "."));
 
-            System.out.println("UI ჯამური ბალანსი: " + uiTotalBalance);
+            System.out.println("UI-დან ბალანსი: " + uiTotalBalanceText);
+
+            // ყველა არა რიცხვითი სიმბოლოს მოშორება, თუმცა მძიმე და წერტილი შევინარჩუნოთ
+            // მძიმე არის ათასეულის, წერტილი კი ათწილადის გამყოფი
+            String cleanedText = uiTotalBalanceText.replaceAll("[^0-9.,]", "");
+
+            // თუ ათასეულის გამყოფი არის მძიმე (3,648.10), ვშლით ყველა მძიმეს
+
+            if (cleanedText.indexOf(",") < cleanedText.indexOf(".")) {
+                cleanedText = cleanedText.replace(",", "");
+            }
+            // თუ ფორმატია (1.234,56), მძიმე არის ათწილადის გამყოფი
+            else {
+                cleanedText = cleanedText.replace(".", ""); // ვშლით წერტილებს (ათასეულის გამყოფებს)
+                cleanedText = cleanedText.replace(",", "."); // მძიმე შევცვალოთ წერტილით
+            }
+
+            double uiTotalBalance = Double.parseDouble(cleanedText);
+            System.out.println("დამუშავებული UI ჯამური ბალანსი: " + uiTotalBalance);
 
             // ანგარიშების და კურსის ინფორმაციის მიღება
             List<AccountDetails> accounts = getAllAccountBalances(accountNumberFromUI);
@@ -75,6 +93,10 @@ public class CardBalanceSteps extends MyCredoWebElements {
                 }
             }
 
+            // დავამრგვალოთ ორივე მნიშვნელობა ორ ათწილადამდე
+            uiTotalBalance = Math.round(uiTotalBalance * 100.0) / 100.0;
+            apiTotalBalance = Math.round(apiTotalBalance * 100.0) / 100.0;
+
             System.out.println("BuyRate (USD -> GEL): " + buyRate);
             System.out.println("API ჯამური ბალანსი: " + apiTotalBalance);
 
@@ -89,6 +111,7 @@ public class CardBalanceSteps extends MyCredoWebElements {
 
         } catch (Exception e) {
             System.err.println("შეცდომა ჯამური ბალანსის შემოწმებისას: " + e.getMessage());
+            e.printStackTrace();
             Assert.fail("შეცდომა ჯამური ბალანსის შემოწმებისას: " + e.getMessage());
         }
 
@@ -100,14 +123,45 @@ public class CardBalanceSteps extends MyCredoWebElements {
             // UI-დან ინფორმაციის წამოღება
             String accountNumberFromUI = AccountNumberUI.getText().trim();
 
-            String gelText = AvailableBalanceGEL.getText().trim().replaceAll("[^0-9.,]", "").replace(",", ".");
-            String usdText = AvailableBalanceUSD.getText().trim().replaceAll("[^0-9.,]", "").replace(",", ".");
-            double uiBalanceGel = Float.valueOf(gelText).doubleValue();
-            double uiBalanceUsd = Float.valueOf(usdText).doubleValue();
+            // GEL ბალანსის დამუშავება
+            String gelText = AvailableBalanceGEL.getText().trim();
+            System.out.println("UI-დან წამოღებული GEL ბალანსი: " + gelText);
 
-            System.out.println("UI GEL ბალანსი: " + uiBalanceGel);
-            System.out.println("UI USD ბალანსი: " + uiBalanceUsd);
+            // ათასეულის და ათწილადის გამყოფების გათვალისწინება
+            String cleanedGelText = gelText.replaceAll("[^0-9.,]", "");
 
+            // თუ ათასეულის გამყოფი არის მძიმე (3,648.10), ვშლით ყველა მძიმეს
+            if (cleanedGelText.indexOf(",") < cleanedGelText.indexOf(".")) {
+                cleanedGelText = cleanedGelText.replace(",", "");
+            }
+            // თუ ევროპული ფორმატია (1.234,56), მძიმე არის ათწილადის გამყოფი
+            else {
+                cleanedGelText = cleanedGelText.replace(".", ""); // ვშლით წერტილებს
+                cleanedGelText = cleanedGelText.replace(",", "."); // მძიმე შევცვალოთ წერტილით
+            }
+
+            double uiBalanceGel = Double.parseDouble(cleanedGelText);
+
+            // USD ბალანსის დამუშავება
+            String usdText = AvailableBalanceUSD.getText().trim();
+            System.out.println("UI-დან წამოღებული USD ბალანსი: " + usdText);
+
+            // იგივე მეთოდი USD-სთვის
+            String cleanedUsdText = usdText.replaceAll("[^0-9.,]", "");
+
+            if (cleanedUsdText.indexOf(",") < cleanedUsdText.indexOf(".")) {
+                cleanedUsdText = cleanedUsdText.replace(",", "");
+            } else {
+                cleanedUsdText = cleanedUsdText.replace(".", "");
+                cleanedUsdText = cleanedUsdText.replace(",", ".");
+            }
+
+            double uiBalanceUsd = Double.parseDouble(cleanedUsdText);
+
+            System.out.println("დამუშავებული UI GEL ბალანსი: " + uiBalanceGel);
+            System.out.println("დამუშავებული UI USD ბალანსი: " + uiBalanceUsd);
+
+            // მივიღოთ API მონაცემები
             List<AccountDetails> accounts = getAllAccountBalances(accountNumberFromUI);
 
             // API-დან მიღებული ბალანსების გამოთვლა
@@ -122,21 +176,18 @@ public class CardBalanceSteps extends MyCredoWebElements {
                 }
             }
 
+            // დავამრგვალოთ ორივე მნიშვნელობა ორ ათწილადამდე
+            uiBalanceGel = Math.round(uiBalanceGel * 100.0) / 100.0;
+            uiBalanceUsd = Math.round(uiBalanceUsd * 100.0) / 100.0;
+            apiBalanceGel = Math.round(apiBalanceGel * 100.0) / 100.0;
+            apiBalanceUsd = Math.round(apiBalanceUsd * 100.0) / 100.0;
+
             System.out.println("API GEL ბალანსი: " + apiBalanceGel);
             System.out.println("API USD ბალანსი: " + apiBalanceUsd);
 
-            double gelDifference = apiBalanceGel - uiBalanceGel;
-            if (gelDifference < 0) {
-                gelDifference = -gelDifference;
-            }
-
-            double usdDifference = apiBalanceUsd - uiBalanceUsd;
-            if (usdDifference < 0) {
-                usdDifference = -usdDifference;
-            }
-
-            boolean gelMatch = gelDifference <= 0.01;
-            boolean usdMatch = usdDifference <= 0.01;
+            // შევადაროთ ბალანსები
+            boolean gelMatch = Math.abs(apiBalanceGel - uiBalanceGel) <= 0.01;
+            boolean usdMatch = Math.abs(apiBalanceUsd - uiBalanceUsd) <= 0.01;
 
             System.out.println("GEL ბალანსი ემთხვევა: " + gelMatch);
             System.out.println("USD ბალანსი ემთხვევა: " + usdMatch);
@@ -152,6 +203,7 @@ public class CardBalanceSteps extends MyCredoWebElements {
 
         } catch (Exception e) {
             System.err.println("შეცდომა ვალუტების ბალანსების შემოწმებისას: " + e.getMessage());
+            e.printStackTrace(); // დეტალური შეცდომის ინფორმაცია
             Assert.fail("შეცდომა ვალუტების ბალანსების შემოწმებისას: " + e.getMessage());
         }
 

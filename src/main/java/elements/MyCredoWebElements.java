@@ -55,5 +55,15 @@ public class MyCredoWebElements {
             RequisiteButton = $("#downloadRequisite"),
             SenderNumberUI = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/app-popup-container/div/div/div[2]/div/div[2]/div[1]/div/p[2]")),
             ReceiverNumberUI = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/app-popup-container/div/div/div[2]/div/div[2]/div[2]/div/p[2]")),
-            AmountUI = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/app-popup-container/div/div/div[2]/div/div[2]/div[3]/div/p[2]"));
+            AmountUI = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/app-popup-container/div/div/div[2]/div/div[2]/div[3]/div/p[2]")),
+            CloseSuccessPage = $(byXpath("/html/body/app-root/app-home/div/div/app-financial-operations/div/div/div/app-transfers/div/div[2]/app-transfers-to-own-account/app-popup-container/div/div/div[1]/div[2]")),
+            HomePageLogo = $(byXpath("/html/body/app-root/app-home/div/div/app-home-header/header/div/img")),
+            CreditTransactionUI = $(byXpath("/html/body/app-root/app-home/div/div/app-main/div/div[1]/div[1]/div[1]/app-transactions-list/div/div[2]/div/div[1]/ul/li[1]")),
+            DebitTransactionUI = $(byXpath("/html/body/app-root/app-home/div/div/app-main/div/div[1]/div[1]/div[1]/app-transactions-list/div/div[2]/div/div[1]/ul/li[2]")),
+            OperationTypeUI = $(byXpath("/html/body/app-root/app-home/div/div/app-main/div/div[1]/div[1]/div[1]/app-transactions-list/app-transaction-details/app-popup-container/div/div/div[1]/div[1]/p")),
+            CloseDetails = $(byXpath("/html/body/app-root/app-home/div/div/app-main/div/div[1]/div[1]/div[1]/app-transactions-list/app-transaction-details/app-popup-container/div/div/div[1]/div[2]")),
+            SenderDetailsUI = $(byXpath("/html/body/app-root/app-home/div/div/app-main/div/div[1]/div[1]/div[1]/app-transactions-list/app-transaction-details/app-popup-container/div/div/div[2]/div/app-transaction-details-from/div/div/div[2]/div/p")),
+            ReceiverDetailsUI = $(byXpath("/html/body/app-root/app-home/div/div/app-main/div/div[1]/div[1]/div[1]/app-transactions-list/app-transaction-details/app-popup-container/div/div/div[2]/div/app-transaction-details-to/div/div/div[2]/div/p")),
+            AmountAndCurrencyUI = $(byXpath("/html/body/app-root/app-home/div/div/app-main/div/div[1]/div[1]/div[1]/app-transactions-list/app-transaction-details/app-popup-container/div/div/div[2]/div/div/div[1]/p[1]"));
+
 }

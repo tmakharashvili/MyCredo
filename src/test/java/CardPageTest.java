@@ -9,6 +9,7 @@ public class CardPageTest extends SetUpClass {
     PinResetSteps pinResetSteps = new PinResetSteps();
     CardNavigationSteps cardNavigationSteps = new CardNavigationSteps();
     TransferSteps transferSteps = new TransferSteps();
+    TransactionSteps transactionSteps = new TransactionSteps();
 
     @Test
     public void checkCardNameAndBalance(){
@@ -68,5 +69,9 @@ public class CardPageTest extends SetUpClass {
                 .checkTransferNavigation()
                 .moneyTransfer()
                 .verifyTransferDetails();
+        transactionSteps
+                .verifyDebitTransactionDetails()
+                .verifyCreditTransactionDetails();
+
     }
 }

@@ -1,0 +1,17 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Card Page Test Suite">
+    <test name="Card Functionality Tests">
+        <classes>
+            <class name="CardPageTest">
+                <methods>
+                    <include name="checkCardNameAndBalance"/>
+                    <include name="blockCardModuleTest"/>
+                    <include name="pinReset"/>
+                    <include name="cardNavigation"/>
+                    <include name="downloadRequisite"/>
+                    <include name="TransferAmount"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

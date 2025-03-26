@@ -1,8 +1,11 @@
 package steps;
 
+import com.codeborne.selenide.Condition;
 import dataController.DataControllerTransfer;
 import elements.MyCredoWebElements;
+import io.restassured.response.Response;
 import models.cardModule.MoneyTransfer;
+import models.cardModule.Transaction;
 import org.testng.Assert;
 
 import java.sql.SQLException;
@@ -10,12 +13,13 @@ import java.time.Duration;
 import java.util.List;
 
 import static com.codeborne.selenide.Condition.visible;
+import static org.testng.Assert.assertEquals;
 
 public class TransferSteps extends MyCredoWebElements {
     private String actualAccountNumber;
 
 
-    public TransferSteps checkTransferNavigation(){
+    public TransferSteps checkTransferNavigation() {
         actualAccountNumber = AccountNumberUI.getText().trim();
 
         TransferButton.click();
@@ -24,11 +28,12 @@ public class TransferSteps extends MyCredoWebElements {
         return this;
     }
 
-    public TransferSteps moneyTransfer(){
+    public TransferSteps moneyTransfer() {
         OwnAccounts.click();
         String expectedAccountNumber = FromInput.getText().trim();
+        System.out.println(expectedAccountNumber);
 
-        Assert.assertEquals(actualAccountNumber, expectedAccountNumber, "ანგარიშის ნომრები არ ემთხვევა!");
+        assertEquals(actualAccountNumber, expectedAccountNumber, "ანგარიშის ნომრები არ ემთხვევა!");
 
         WhereInput.click();
         AccountsPopup.shouldBe(visible, Duration.ofSeconds(20));
@@ -71,16 +76,19 @@ public class TransferSteps extends MyCredoWebElements {
                 System.out.println("ვალუტა: " + transfer.getCurrencyApi());
                 System.out.println("ფორმატირებული თანხა და ვალუტა: " + formattedAmountWithSymbol);
 
-                Assert.assertEquals(senderAccountUI, transfer.getSenderAccountNumberApi(), "გამგზავნი ანგარიშის ნომრები არ ემთხვევა!");
-                Assert.assertEquals(receiverAccountUI, transfer.getReceiverAccountNumberApi(), "მიმღები ანგარიშის ნომრები არ ემთხვევა!");
-                Assert.assertEquals(amountWithCurrencyUI, formattedAmountWithSymbol, "თანხა და ვალუტა არ ემთხვევა!");
+                assertEquals(senderAccountUI, transfer.getSenderAccountNumberApi(), "გამგზავნი ანგარიშის ნომრები არ ემთხვევა!");
+                assertEquals(receiverAccountUI, transfer.getReceiverAccountNumberApi(), "მიმღები ანგარიშის ნომრები არ ემთხვევა!");
+                assertEquals(amountWithCurrencyUI, formattedAmountWithSymbol, "თანხა და ვალუტა არ ემთხვევა!");
             } else {
                 Assert.fail("მონაცემთა ბაზაში ვერ მოიძებნა გადარიცხვა მითითებული ანგარიშებით!");
             }
+            CloseSuccessPage.click();
+            HomePageLogo.click();
+
+            return this;
         } catch (SQLException e) {
             Assert.fail("გადარიცხვის შემოწმებისას მოხდა შეცდომა: " + e.getMessage());
+            return this;
         }
-
-        return this;
     }
 }
