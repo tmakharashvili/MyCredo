@@ -23,14 +23,10 @@ public class Transaction {
         }
 
         String formattedAmount;
-        // დებეტის ტრანზაქციისთვის (გადარიცხვა) UI-ზეა უარყოფითი, დადებითი მოდის API-დან
         if (debit != null && debit > 0) {
-            // ამოვაბრუნოთ უარყოფითი თანხა
             formattedAmount = String.format("-%.2f", amountApi);
         }
-        // კრედიტის ტრანზაქციისთვის (ჩარიცხვა) UI-ზეა დადებითი, API-დანაც დადებითი მოდის
         else if (credit != null && credit > 0) {
-            // ამოვაბრუნოთ დადებითი თანხა
             formattedAmount = String.format("%.2f", amountApi);
         }
         else {

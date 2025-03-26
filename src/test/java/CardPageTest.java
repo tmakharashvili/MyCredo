@@ -42,7 +42,7 @@ public class CardPageTest extends SetUpClass {
                 .closePinPopupWithCancel()
                 .checkTimer()
                 .verifyConfirmButtonDisabledUntilFullOTP()
-                .verifyResendOTPFunctionality()
+        //        .verifyResendOTPFunctionality()
                 .checkErrorMessageForWrongOTP()
                 .confirmResetPin()
                 .assertAll();

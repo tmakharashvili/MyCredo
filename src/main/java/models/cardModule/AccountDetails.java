@@ -13,11 +13,6 @@ public class AccountDetails {
     private double availableBalance;
     private double buyRate;
 
-    public AccountDetails() {
-        // Default კონსტრუქტორი
-    }
-
-    // შევსებული კონსტრუქტორი
     public AccountDetails(String accountNumber, String currency, double availableBalance, double buyRate) {
         this.accountNumber = accountNumber;
         this.currency = currency;

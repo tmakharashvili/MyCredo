@@ -42,8 +42,6 @@ public class CardNavigationSteps extends MyCredoWebElements {
         while (!downloadedFile.exists() && System.currentTimeMillis() - startTime < 10000) {
             Selenide.sleep(500);
         }
-
         Assert.assertTrue(downloadedFile.exists(), "ფაილი არ არსებობს");
-
     }
 }

@@ -1,11 +1,8 @@
 package steps;
 
-import com.codeborne.selenide.Condition;
 import dataController.DataControllerTransfer;
 import elements.MyCredoWebElements;
-import io.restassured.response.Response;
 import models.cardModule.MoneyTransfer;
-import models.cardModule.Transaction;
 import org.testng.Assert;
 
 import java.sql.SQLException;
@@ -39,7 +36,7 @@ public class TransferSteps extends MyCredoWebElements {
         AccountsPopup.shouldBe(visible, Duration.ofSeconds(20));
         AnotherAccount.click();
         AnotherAccountsCurrency.click();
-        AmountInput.setValue("11");
+        AmountInput.setValue("10");
         Transfer.click();
 
         return this;
@@ -52,7 +49,7 @@ public class TransferSteps extends MyCredoWebElements {
             String receiverAccountUI = ReceiverNumberUI.getText().trim();
             String amountWithCurrencyUI = AmountUI.getText().trim();
 
-            // API/DB-დან მონაცემების აღება
+            // API-დან მონაცემების აღება
             List<MoneyTransfer> transfers = DataControllerTransfer.getTransferDetailsFromDB(senderAccountUI, receiverAccountUI);
 
             if (!transfers.isEmpty()) {

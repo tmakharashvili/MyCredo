@@ -4,7 +4,7 @@ import elements.MyCredoWebElements;
 import org.testng.asserts.SoftAssert;
 
 public class BlockCardModuleSteps extends MyCredoWebElements {
-    private SoftAssert softAssert = new SoftAssert();
+    private final SoftAssert softAssert = new SoftAssert();
 
     public BlockCardModuleSteps closePopupWithX(){
         BlockCardButton.click();
