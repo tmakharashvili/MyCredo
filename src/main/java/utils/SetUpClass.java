@@ -14,10 +14,6 @@ public class SetUpClass {
         browser="chrome";
         Configuration.timeout=15000;
         open("https://testmycredo.credo.ge/landing/main/auth");
-
-        if (browser.equalsIgnoreCase("chrome")) {
-            System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
-        }
     }
 
     @AfterTest

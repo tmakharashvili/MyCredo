@@ -7,7 +7,6 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Transaction {
     private String accountNumberApi;
     private String contragentAccount;
@@ -25,15 +24,21 @@ public class Transaction {
         String formattedAmount;
         if (debit != null && debit > 0) {
             formattedAmount = String.format("-%.2f", amountApi);
-        }
-        else if (credit != null && credit > 0) {
+        } else if (credit != null && credit > 0) {
             formattedAmount = String.format("%.2f", amountApi);
-        }
-        else {
+        } else {
             formattedAmount = String.format("%.2f", amountApi);
         }
 
         String currencySymbol = currencyApi.equalsIgnoreCase("GEL") ? "₾" : currencyApi;
         return formattedAmount + currencySymbol;
+    }
+
+    public boolean isDebitTransaction() {
+        return debit != null && debit > 0;
+    }
+
+    public boolean isCreditTransaction() {
+        return credit != null && credit > 0;
     }
 }

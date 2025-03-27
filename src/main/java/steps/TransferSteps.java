@@ -61,12 +61,12 @@ public class TransferSteps extends MyCredoWebElements {
                 String formattedAmountWithSymbol = String.format("%.2f %s", transfer.getAmountApi(), currencySymbol);
 
                 // დეტალების გამოტანა ლოგში
-                System.out.println("UI გადარიცხვის დეტალები:");
+                System.out.println("UI ტრანზაქციის დეტალები:");
                 System.out.println("გამგზავნი ანგარიში: " + senderAccountUI);
                 System.out.println("მიმღები ანგარიში: " + receiverAccountUI);
                 System.out.println("თანხა და ვალუტა: " + amountWithCurrencyUI);
 
-                System.out.println("\nAPI გადარიცხვის დეტალები:");
+                System.out.println("\nAPI ტრანზაქციის დეტალები:");
                 System.out.println("გამგზავნი ანგარიში: " + transfer.getSenderAccountNumberApi());
                 System.out.println("მიმღები ანგარიში: " + transfer.getReceiverAccountNumberApi());
                 System.out.println("თანხა: " + transfer.getAmountApi());

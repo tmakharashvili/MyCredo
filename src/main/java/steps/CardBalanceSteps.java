@@ -36,7 +36,7 @@ public class CardBalanceSteps extends MyCredoWebElements {
             System.out.println("API-დან მიღებული ბარათის სახელი: " + cardNameFromAPI);
 
             Assert.assertEquals(cardNameFromUI, cardNameFromAPI, "ბარათის სახელები არ ემთხვევა!");
-            Assert.assertTrue(!cardNameFromAPI.isEmpty(), "API-დან დაბრუნდა ცარიელი ბარათის სახელი!");
+            Assert.assertFalse(cardNameFromAPI.isEmpty(), "API-დან დაბრუნდა ცარიელი ბარათის სახელი!");
 
         } catch (Exception e) {
             Assert.fail("ტესტის შესრულებისას მოხდა შეცდომა: " + e.getMessage());
@@ -51,27 +51,13 @@ public class CardBalanceSteps extends MyCredoWebElements {
             String accountNumberFromUI = AccountNumberUI.getText().trim();
             String uiTotalBalanceText = AvailableBalance.getText().trim();
 
-            System.out.println("UI-დან ბალანსი: " + uiTotalBalanceText);
-
-            // ყველა არა რიცხვითი სიმბოლოს მოშორება, თუმცა მძიმე და წერტილი შევინარჩუნოთ
-            // მძიმე არის ათასეულის, წერტილი კი ათწილადის გამყოფი
-            String cleanedText = uiTotalBalanceText.replaceAll("[^0-9.,]", "");
-
-            // თუ ათასეულის გამყოფი არის მძიმე (3,648.10), ვშლით ყველა მძიმეს
-
-            if (cleanedText.indexOf(",") < cleanedText.indexOf(".")) {
-                cleanedText = cleanedText.replace(",", "");
-            }
-            // თუ ფორმატია (1.234,56), მძიმე არის ათწილადის გამყოფი
-            else {
-                cleanedText = cleanedText.replace(".", ""); // ვშლით წერტილებს (ათასეულის გამყოფებს)
-                cleanedText = cleanedText.replace(",", "."); // მძიმე შევცვალოთ წერტილით
-            }
+            // ყველა არა რიცხვითი სიმბოლოს მოშორება, წერტილი შევინარჩუნოთ
+            String cleanedText = uiTotalBalanceText.replaceAll("[^0-9.]", "");
 
             double uiTotalBalance = Double.parseDouble(cleanedText);
             System.out.println("დამუშავებული UI ჯამური ბალანსი: " + uiTotalBalance);
 
-            // ანგარიშების და კურსის ინფორმაციის მიღება
+            // ანგარიშების და კურსის ინფორმაციის მიღება ბაზიდან
             List<AccountDetails> accounts = getAllAccountBalances(accountNumberFromUI);
 
             // კურსის პოვნა
@@ -83,131 +69,104 @@ public class CardBalanceSteps extends MyCredoWebElements {
                 }
             }
 
-            // ჯამური API ბალანსის გამოთვლა
-            double apiTotalBalance = 0.0;
+            // ჯამური ბალანსის გამოთვლა
+            double dbTotalBalance = 0.0;
             for (AccountDetails account : accounts) {
                 if ("GEL".equals(account.getCurrency())) {
-                    apiTotalBalance += account.getAvailableBalance();
+                    dbTotalBalance += account.getAvailableBalance();
                 } else if ("USD".equals(account.getCurrency())) {
-                    apiTotalBalance += account.getAvailableBalance() * buyRate;
+                    dbTotalBalance += account.getAvailableBalance() * buyRate;
                 }
             }
 
-            // დავამრგვალოთ ორივე მნიშვნელობა ორ ათწილადამდე
+            // დავამრგვალოთ ორივე მნიშვნელობა ათწილადამდე
             uiTotalBalance = Math.round(uiTotalBalance * 100.0) / 100.0;
-            apiTotalBalance = Math.round(apiTotalBalance * 100.0) / 100.0;
+            dbTotalBalance = Math.round(dbTotalBalance * 100.0) / 100.0;
 
             System.out.println("BuyRate (USD -> GEL): " + buyRate);
-            System.out.println("API ჯამური ბალანსი: " + apiTotalBalance);
+            System.out.println("ბაზის ჯამური ბალანსი: " + dbTotalBalance);
 
-            // ბალანსების შედარება
-            boolean isMatch = Math.abs(apiTotalBalance - uiTotalBalance) <= 0.1;
+            boolean isMatch = Math.abs(dbTotalBalance - uiTotalBalance) <= 0.1;
             System.out.println("ჯამური ბალანსი ემთხვევა: " + isMatch);
 
-            // ბალანსების დადასტურება
-            if (!isMatch) {
-                Assert.fail("ჯამური ბალანსი არ ემთხვევა! UI: " + uiTotalBalance + ", API: " + apiTotalBalance);
-            }
+            Assert.assertEquals(uiTotalBalance, dbTotalBalance, 0.1,
+                    "ჯამური ბალანსი არ ემთხვევა! UI: " + uiTotalBalance + ", ბაზა: " + dbTotalBalance);
 
         } catch (Exception e) {
             System.err.println("შეცდომა ჯამური ბალანსის შემოწმებისას: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("შეცდომის მიზეზი: " + e.getCause());
             Assert.fail("შეცდომა ჯამური ბალანსის შემოწმებისას: " + e.getMessage());
         }
 
         return this;
     }
 
-    public CardBalanceSteps checkBalancesByCurrency() {
+    public void checkBalancesByCurrency() {
         try {
             // UI-დან ინფორმაციის წამოღება
             String accountNumberFromUI = AccountNumberUI.getText().trim();
 
             // GEL ბალანსის დამუშავება
             String gelText = AvailableBalanceGEL.getText().trim();
-            System.out.println("UI-დან წამოღებული GEL ბალანსი: " + gelText);
 
             // ათასეულის და ათწილადის გამყოფების გათვალისწინება
-            String cleanedGelText = gelText.replaceAll("[^0-9.,]", "");
+            String cleanedGelText = gelText.replaceAll("[^0-9.]", "");
 
-            // თუ ათასეულის გამყოფი არის მძიმე (3,648.10), ვშლით ყველა მძიმეს
-            if (cleanedGelText.indexOf(",") < cleanedGelText.indexOf(".")) {
-                cleanedGelText = cleanedGelText.replace(",", "");
-            }
-            // თუ ევროპული ფორმატია (1.234,56), მძიმე არის ათწილადის გამყოფი
-            else {
-                cleanedGelText = cleanedGelText.replace(".", ""); // ვშლით წერტილებს
-                cleanedGelText = cleanedGelText.replace(",", "."); // მძიმე შევცვალოთ წერტილით
-            }
 
             double uiBalanceGel = Double.parseDouble(cleanedGelText);
 
             // USD ბალანსის დამუშავება
             String usdText = AvailableBalanceUSD.getText().trim();
-            System.out.println("UI-დან წამოღებული USD ბალანსი: " + usdText);
 
             // იგივე მეთოდი USD-სთვის
-            String cleanedUsdText = usdText.replaceAll("[^0-9.,]", "");
-
-            if (cleanedUsdText.indexOf(",") < cleanedUsdText.indexOf(".")) {
-                cleanedUsdText = cleanedUsdText.replace(",", "");
-            } else {
-                cleanedUsdText = cleanedUsdText.replace(".", "");
-                cleanedUsdText = cleanedUsdText.replace(",", ".");
-            }
+            String cleanedUsdText = usdText.replaceAll("[^0-9.]", "");
 
             double uiBalanceUsd = Double.parseDouble(cleanedUsdText);
 
             System.out.println("დამუშავებული UI GEL ბალანსი: " + uiBalanceGel);
             System.out.println("დამუშავებული UI USD ბალანსი: " + uiBalanceUsd);
 
-            // მივიღოთ API მონაცემები
+            // მივიღოთ ბაზის მონაცემები
             List<AccountDetails> accounts = getAllAccountBalances(accountNumberFromUI);
 
-            // API-დან მიღებული ბალანსების გამოთვლა
-            double apiBalanceGel = 0.0;
-            double apiBalanceUsd = 0.0;
+            // ბაზიდან მიღებული ბალანსების გამოთვლა
+            double dbBalanceGel = 0.0;
+            double dbBalanceUsd = 0.0;
 
             for (AccountDetails account : accounts) {
                 if ("GEL".equals(account.getCurrency())) {
-                    apiBalanceGel += account.getAvailableBalance();
+                    dbBalanceGel += account.getAvailableBalance();
                 } else if ("USD".equals(account.getCurrency())) {
-                    apiBalanceUsd += account.getAvailableBalance();
+                    dbBalanceUsd += account.getAvailableBalance();
                 }
             }
-
-            // დავამრგვალოთ ორივე მნიშვნელობა ორ ათწილადამდე
+            // დავამრგვალოთ ყველა მნიშვნელობა ათწილადამდე
             uiBalanceGel = Math.round(uiBalanceGel * 100.0) / 100.0;
             uiBalanceUsd = Math.round(uiBalanceUsd * 100.0) / 100.0;
-            apiBalanceGel = Math.round(apiBalanceGel * 100.0) / 100.0;
-            apiBalanceUsd = Math.round(apiBalanceUsd * 100.0) / 100.0;
+            dbBalanceGel = Math.round(dbBalanceGel * 100.0) / 100.0;
+            dbBalanceUsd = Math.round(dbBalanceUsd * 100.0) / 100.0;
 
-            System.out.println("API GEL ბალანსი: " + apiBalanceGel);
-            System.out.println("API USD ბალანსი: " + apiBalanceUsd);
+            System.out.println("ბაზის GEL ბალანსი: " + dbBalanceGel);
+            System.out.println("ბაზის USD ბალანსი: " + dbBalanceUsd);
 
-            // შევადაროთ ბალანსები
-            boolean gelMatch = Math.abs(apiBalanceGel - uiBalanceGel) <= 0.01;
-            boolean usdMatch = Math.abs(apiBalanceUsd - uiBalanceUsd) <= 0.01;
+            boolean gelMatch = Math.abs(dbBalanceGel - uiBalanceGel) <= 0.01;
+            boolean usdMatch = Math.abs(dbBalanceUsd - uiBalanceUsd) <= 0.01;
 
             System.out.println("GEL ბალანსი ემთხვევა: " + gelMatch);
             System.out.println("USD ბალანსი ემთხვევა: " + usdMatch);
 
-            // ბალანსების დადასტურება
-            if (!gelMatch) {
-                Assert.fail("GEL ბალანსი არ ემთხვევა UI: " + uiBalanceGel + ", API: " + apiBalanceGel);
-            }
+            // შევადაროთ ბალანსები
+            Assert.assertEquals(uiBalanceGel, dbBalanceGel, 0.01,
+                    "GEL ბალანსი არ ემთხვევა! UI: " + uiBalanceGel + ", ბაზა: " + dbBalanceGel);
 
-            if (!usdMatch) {
-                Assert.fail("USD ბალანსი არ ემთხვევა UI: " + uiBalanceUsd + ", API: " + apiBalanceUsd);
-            }
+            Assert.assertEquals(uiBalanceUsd, dbBalanceUsd, 0.01,
+                    "USD ბალანსი არ ემთხვევა! UI: " + uiBalanceUsd + ", ბაზა: " + dbBalanceUsd);
 
         } catch (Exception e) {
             System.err.println("შეცდომა ვალუტების ბალანსების შემოწმებისას: " + e.getMessage());
-            e.printStackTrace(); // დეტალური შეცდომის ინფორმაცია
+            System.err.println("შეცდომის მიზეზი: " + e.getCause());
             Assert.fail("შეცდომა ვალუტების ბალანსების შემოწმებისას: " + e.getMessage());
         }
-
-        return this;
     }
 }
 

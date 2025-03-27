@@ -71,76 +71,94 @@ public class DataControllerTransfer {
     }
 
     private static final String QUERY_TRANSACTION_DETAILS = """
-            SELECT TOP 2 Request 
-            FROM LogDB.dbo.MyCredoExternalApiLog 
-            WHERE ActionUrl LIKE '%/api/v1/payments/MoneyTransfer%' 
-            AND Request LIKE ? 
+            SELECT TOP 2 Response\s
+            FROM LogDB.dbo.MyCredoExternalApiLog\s
+            WHERE ActionUrl LIKE '%transaction/%' AND ActionUrl LIKE '%detail%'\s
             ORDER BY CreateDate DESC
             """;
 
-    public static List<Transaction> getTransactionDetailsFromDB(String senderAccount, String receiverAccount) throws SQLException {
+
+    public static List<Transaction> getTransactionDetailsFromDB(String senderAccount, String receiverAccount) {
         List<Transaction> transactionList = new ArrayList<>();
-        try (Connection dataBaseAccessSql = DataBaseAccessSQL.getConnectionSMS();
-             PreparedStatement preparedStatement = dataBaseAccessSql.prepareStatement(QUERY_TRANSACTION_DETAILS)) {
 
-            preparedStatement.setString(1, "%\"SenderAccountNumber\":\"" + senderAccount +
-                    "%\"ReceiverAccountNumber\":\"" + receiverAccount + "%");
-
+        try {
+            Connection dataBaseAccessSql = DataBaseAccessSQL.getConnectionSMS();
+            PreparedStatement preparedStatement = dataBaseAccessSql.prepareStatement(QUERY_TRANSACTION_DETAILS);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                String request = resultSet.getString("Request");
+                String response = resultSet.getString("Response");
 
-                try {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    JsonNode jsonRequest = objectMapper.readTree(request);
-                    JsonNode transferList = jsonRequest.get("MoneyTransferList");
+                List<Transaction> parsedTransactions = parseJsonTransactions(response);
 
-                    if (transferList != null && transferList.isArray()) {
-                        for (JsonNode transfer : transferList) {
-                            String sender = transfer.get("SenderAccountNumber").asText();
-                            String receiver = transfer.get("ReceiverAccountNumber").asText();
-
-                            if (senderAccount.equals(sender) && receiverAccount.equals(receiver)) {
-                                // ეს არის გადარიცხვის (დებეტის) ტრანზაქცია
-                                Transaction debitTransaction = new Transaction();
-                                debitTransaction.setAccountNumberApi(sender);
-                                debitTransaction.setContragentAccount(receiver);
-                                debitTransaction.setAmountApi(transfer.get("Amount").asDouble());
-                                debitTransaction.setCurrencyApi(transfer.get("CurrencyType").asText());
-                                debitTransaction.setDebit(transfer.get("Amount").asDouble());
-                                debitTransaction.setOperationTypeApi("საკუთარ ანგარიშებს შორის გადარიცხვა");
-
-                                // ეს არის ჩარიცხვის (კრედიტის) ტრანზაქცია
-                                Transaction creditTransaction = new Transaction();
-                                creditTransaction.setAccountNumberApi(receiver);
-                                creditTransaction.setContragentAccount(sender);
-                                creditTransaction.setAmountApi(transfer.get("Amount").asDouble());
-                                creditTransaction.setCurrencyApi(transfer.get("CurrencyType").asText());
-                                creditTransaction.setCredit(transfer.get("Amount").asDouble());
-                                creditTransaction.setOperationTypeApi("საკუთარ ანგარიშებს შორის გადარიცხვა");
-
-                                transactionList.add(debitTransaction);
-                                transactionList.add(creditTransaction);
-                                break;
-                            }
-                        }
+                for (Transaction transaction : parsedTransactions) {
+                    if (matchesAccounts(transaction, senderAccount, receiverAccount)) {
+                        transactionList.add(transaction);
                     }
-                } catch (Exception e) {
-                    System.err.println("მონაცემების ამოღებისას დაფიქსირდა შეცდომა: " + e.getMessage());
                 }
             }
+
+            // ბაზის დახურვა
+            resultSet.close();
+            preparedStatement.close();
+            dataBaseAccessSql.close();
+
+            System.out.println("სულ ნაპოვნია " + transactionList.size() + " ტრანზაქცია");
+
+            if (transactionList.isEmpty()) {
+                System.out.println("ტრანზაქციები ვერ მოიძებნა მითითებული ანგარიშებისთვის: " +
+                        senderAccount + " -> " + receiverAccount);
+            }
+
+            return transactionList;
+
+        } catch (Exception e) {
+            System.err.println("შეცდომა ბაზიდან მონაცემების ამოღებისას: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
         }
-        return transactionList;
     }
+
+    private static boolean matchesAccounts(Transaction transaction, String senderAccount, String receiverAccount) {
+        if (transaction.isDebitTransaction()) {
+            boolean senderMatch = transaction.getAccountNumberApi() != null &&
+                    (transaction.getAccountNumberApi().equals(senderAccount) ||
+                            senderAccount.contains(transaction.getAccountNumberApi()) ||
+                            transaction.getAccountNumberApi().contains(senderAccount));
+
+            boolean receiverMatch = transaction.getContragentAccount() != null &&
+                    (transaction.getContragentAccount().equals(receiverAccount) ||
+                            receiverAccount.contains(transaction.getContragentAccount()) ||
+                            transaction.getContragentAccount().contains(receiverAccount));
+
+            return senderMatch && receiverMatch;
+        }
+        else if (transaction.isCreditTransaction()) {
+            boolean receiverMatch = transaction.getAccountNumberApi() != null &&
+                    (transaction.getAccountNumberApi().equals(receiverAccount) ||
+                            receiverAccount.contains(transaction.getAccountNumberApi()) ||
+                            transaction.getAccountNumberApi().contains(receiverAccount));
+
+            boolean senderMatch = transaction.getContragentAccount() != null &&
+                    (transaction.getContragentAccount().equals(senderAccount) ||
+                            senderAccount.contains(transaction.getContragentAccount()) ||
+                            transaction.getContragentAccount().contains(senderAccount));
+
+            return senderMatch && receiverMatch;
+        }
+        return false;
+    }
+
+    //json მონაცემების დამუშავება ტრანზაქციების სიად
 
     public static List<Transaction> parseJsonTransactions(String jsonData) {
         List<Transaction> transactionList = new ArrayList<>();
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(jsonData);
 
-            // ვამუშავებთ JSON მასივს
+            // JSON მასივის დამუშავება
             if (root.isArray()) {
                 for (JsonNode node : root) {
                     if (node.has("data")) {
@@ -148,7 +166,7 @@ public class DataControllerTransfer {
                     }
                 }
             }
-            // ვამუშავებთ ერთ JSON ობიექტს
+            // JSON ობიექტის დამუშავება
             else if (root.isObject() && root.has("data")) {
                 addTransactionFromData(root.get("data"), transactionList);
             }
@@ -159,10 +177,12 @@ public class DataControllerTransfer {
         return transactionList;
     }
 
+    // JSON data ობიექტიდან ტრანზაქციის შექმნა და სიაში დამატება
+
     private static void addTransactionFromData(JsonNode data, List<Transaction> transactionList) {
         if (data == null) return;
 
-        // ვკითხულობთ საჭირო ველებს JSON-დან
+        // JSON-დან საჭირო ველების წაკითხვა
         String accountNumber = getTextValue(data, "accountNumber");
         String contragentAccount = getTextValue(data, "contragentAccount");
         String currency = getTextValue(data, "currency");
@@ -173,8 +193,8 @@ public class DataControllerTransfer {
             amount = data.get("amount").asDouble();
         }
 
-        // თუ გვაქვს დებეტი ტრანზაქციის ველი
-        if (data.has("debit") && !data.get("debit").isNull()) {
+        // დავაგენერიროთ დებეტის ტრანზაქცია
+        if (data.has("debit") && !data.get("debit").isNull() && data.get("debit").asDouble() > 0) {
             Transaction transaction = new Transaction();
             transaction.setAccountNumberApi(accountNumber);
             transaction.setContragentAccount(contragentAccount);
@@ -182,18 +202,12 @@ public class DataControllerTransfer {
             transaction.setCurrencyApi(currency);
             transaction.setOperationTypeApi(operationType);
             transaction.setDebit(data.get("debit").asDouble());
+            transaction.setCredit(null);
             transactionList.add(transaction);
-
-            System.out.println("დებეტის ტრანზაქცია (JSON-დან):");
-            System.out.println("ანგარიშის ნომერი: " + accountNumber);
-            System.out.println("კონტრაგენტი: " + contragentAccount);
-            System.out.println("თანხა: " + amount);
-            System.out.println("ვალუტა: " + currency);
-            System.out.println("ოპერაციის ტიპი: " + operationType);
         }
 
-        // თუ გვაქვს კრედიტის ტრანზაქციის ველი
-        if (data.has("credit") && !data.get("credit").isNull()) {
+        // დავაგენერიროთ კრედიტის ტრანზაქცია
+        if (data.has("credit") && !data.get("credit").isNull() && data.get("credit").asDouble() > 0) {
             Transaction transaction = new Transaction();
             transaction.setAccountNumberApi(accountNumber);
             transaction.setContragentAccount(contragentAccount);
@@ -201,20 +215,18 @@ public class DataControllerTransfer {
             transaction.setCurrencyApi(currency);
             transaction.setOperationTypeApi(operationType);
             transaction.setCredit(data.get("credit").asDouble());
+            transaction.setDebit(null);
             transactionList.add(transaction);
-
-            System.out.println("კრედიტის ტრანზაქცია (JSON-დან):");
-            System.out.println("ანგარიშის ნომერი: " + accountNumber);
-            System.out.println("კონტრაგენტი: " + contragentAccount);
-            System.out.println("თანხა: " + amount);
-            System.out.println("ვალუტა: " + currency);
-            System.out.println("ოპერაციის ტიპი: " + operationType);
         }
     }
+
+    // JSON ობიექტიდან ტექსტური მნიშვნელობის ამოღება
 
     private static String getTextValue(JsonNode node, String fieldName) {
         return node.has(fieldName) && !node.get(fieldName).isNull() ? node.get(fieldName).asText() : null;
     }
+
+    // API პასუხიდან ტრანზაქციების სიის გენერაცია
 
     public static List<Transaction> getTransactionsFromResponse(Response response) {
         try {

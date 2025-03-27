@@ -151,7 +151,7 @@ public class DataControllerCardModule {
         return accountDetailsList;
     }
 
-    // JSON-დან ანგარიშის ბალანსების ამოღება
+    // JSON-დან ბალანსების ამოღება
     private static List<AccountDetails> extractAccountBalances(String response, String accountNumber) {
         List<AccountDetails> accountDetailsList = new ArrayList<>();
         try {
@@ -229,10 +229,10 @@ public class DataControllerCardModule {
             }
 
             // თუ აქამდე მოვედით, ვერ ვიპოვეთ კურსი
-            throw new SQLException("GEL ვალუტის კურსი ვერ მოიძებნა API პასუხში");
+            throw new SQLException("GEL ვალუტის კურსი ვერ მოიძებნა");
 
         } catch (Exception e) {
-            System.err.println("API-დან ვალუტის კურსის მიღების შეცდომა: " + e.getMessage());
+            System.err.println("ვალუტის კურსის მიღების შეცდომა: " + e.getMessage());
             throw new RuntimeException("კურსის მიღება ვერ მოხერხდა: " + e.getMessage());
         }
     }
