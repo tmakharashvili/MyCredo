@@ -19,7 +19,7 @@ import java.util.List;
 public class DataControllerCardModule {
     private static final String QUERY_CARD_DETAILS = """
         SELECT TOP 1 Response 
-        FROM LogDB.dbo.MyCredoExternalApiLog 
+        FROM LogDB.dbo.MyCredoExternalApiLog (nolock)
         WHERE ActionUrl LIKE '%/api/Card/CardList%' 
         AND Response LIKE ?
         ORDER BY CreateDate DESC
@@ -67,7 +67,7 @@ public class DataControllerCardModule {
 
     private static final String QUERY_ACCOUNT_DETAILS = """
         SELECT TOP 1 Response 
-        FROM LogDB.dbo.MyCredoExternalApiLog 
+        FROM LogDB.dbo.MyCredoExternalApiLog (nolock)
         WHERE ActionUrl LIKE '%/api/Account/AccountList%' 
         AND Response LIKE ? 
         ORDER BY CreateDate DESC
@@ -75,7 +75,7 @@ public class DataControllerCardModule {
 
     private static final String QUERY_CURRENCY_RATE = """
         SELECT TOP 1 Response 
-        FROM LogDB.dbo.MyCredoExternalApiLog 
+        FROM LogDB.dbo.MyCredoExternalApiLog (nolock)
         WHERE ActionUrl LIKE '%/api/Core/CurrencyRateList%' 
         AND UserId = '792247'
         ORDER BY CreateDate DESC

@@ -16,7 +16,7 @@ import java.util.List;
 public class DataControllerTransfer {
     private static final String QUERY_TRANSFER_DETAILS = """
                 SELECT TOP 1 Request 
-            FROM LogDB.dbo.MyCredoExternalApiLog 
+            FROM LogDB.dbo.MyCredoExternalApiLog (nolock)
             WHERE ActionUrl LIKE '%/api/v1/payments/MoneyTransfer%' 
             AND Request LIKE ? 
             ORDER BY CreateDate DESC
@@ -71,9 +71,9 @@ public class DataControllerTransfer {
     }
 
     private static final String QUERY_TRANSACTION_DETAILS = """
-            SELECT TOP 2 Response\s
-            FROM LogDB.dbo.MyCredoExternalApiLog\s
-            WHERE ActionUrl LIKE '%transaction/%' AND ActionUrl LIKE '%detail%'\s
+            SELECT TOP 2 Response
+            FROM LogDB.dbo.MyCredoExternalApiLog (nolock)
+            WHERE ActionUrl LIKE '%transaction/%' AND ActionUrl LIKE '%detail%'
             ORDER BY CreateDate DESC
             """;
 
